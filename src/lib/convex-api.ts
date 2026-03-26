@@ -8,6 +8,7 @@ export const convexApi = {
     list: "deepDives:list",
     get: "deepDives:get",
     createDeepDive: "deepDives:createDeepDive",
+    renameDeepDive: "deepDives:renameDeepDive",
     createThread: "deepDives:createThread",
     addUploads: "deepDives:addUploads",
     removeUpload: "deepDives:removeUpload",

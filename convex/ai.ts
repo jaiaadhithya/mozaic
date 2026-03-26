@@ -7,8 +7,8 @@ import type { AIProvider } from "../src/types/ai";
 import type { DeepDiveUIMessage } from "../src/lib/deep-dive-types";
 
 const MODEL_BY_PROVIDER: Record<AIProvider, string> = {
-  gpt: "openai/gpt-oss-20b:free",
-  gemini: "meta-llama/llama-3.3-70b-instruct:free",
+  gpt: "openai/gpt-oss-120b:free",
+  gemini: "stepfun/step-3.5-flash:free",
   claude: "nvidia/nemotron-3-super-120b-a12b:free",
 };
 
@@ -16,7 +16,8 @@ const labelToProvider: Record<string, AIProvider> = {
   gpt: "gpt",
   gemini: "gemini",
   claude: "claude",
-  llama: "gemini",
+  step: "gemini",
+  stepfun: "gemini",
   nemotron: "claude",
 };
 
@@ -32,7 +33,7 @@ function stripProviderMention(input: string) {
 
 function providerDisplayName(provider: AIProvider) {
   if (provider === "gpt") return "GPT";
-  if (provider === "gemini") return "Llama";
+  if (provider === "gemini") return "Step";
   return "Nemotron";
 }
 

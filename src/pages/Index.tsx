@@ -10,12 +10,12 @@ function AppContent() {
   const { mode, activeProviders } = useChatContext();
 
   return (
-    <div className="flex flex-col h-screen overflow-hidden">
+    <div className="flex h-screen flex-col overflow-hidden bg-background">
       <AppHeader />
       <main className="flex-1 overflow-hidden">
         {mode === "split" && (
           <div
-            className="grid h-full gap-3 p-3"
+            className="grid h-full gap-px bg-border"
             style={{
               gridTemplateColumns: activeProviders.length <= 2
                 ? `repeat(${activeProviders.length}, 1fr)`

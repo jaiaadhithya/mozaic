@@ -113,192 +113,133 @@ export function MessageList({ messages, isTyping, showProviderBadge }: MessageLi
   return (
     <div className="flex-1 overflow-y-auto scrollbar-thin p-4 space-y-3">
       {messages.length === 0 && !isTyping && (
-        <div className="flex items-center justify-center h-full text-muted-foreground text-sm">
-          Start a conversation...
+        <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
+          Start a conversation…
         </div>
       )}
-      {messages.map((msg, i) => (
-        <div
-          key={msg.id}
-          className="animate-fade-up"
-          style={{ animationDelay: `${Math.min(i * 40, 200)}ms` }}
-        >
-          <MessageBubble
-            message={msg}
-            showProviderBadge={showProviderBadge}
-            onAsk={() => onAsk(i, msg.provider as AIProvider | undefined)}
-            onVote={() => onVote(i)}
-            onDebate={() => onDebate(i)}
-            askLabel={`Ask ${AI_MODELS[defaultOther(msg.provider as AIProvider | undefined)].name}`}
-          />
-        </div>
-      ))}
+      {messages.map((msg, i) => {
+        const isUser = msg.role === "user";
+        const provider = msg.provider as AIProvider | "master" | undefined;
+        const model = provider && provider !== "master" ? AI_MODELS[provider] : null;
+        const colorVar = provider === "master" ? "ai-master" : model?.color;
+
+        return (
+          <div
+            key={msg.id}
+            className={`flex ${isUser ? "justify-end" : "justify-start"}`}
+          >
+            <div
+              className={`group relative max-w-[85%] rounded-lg px-3.5 py-2.5 text-sm leading-relaxed ${
+                isUser
+                  ? "bg-secondary text-foreground"
+                  : "border border-border bg-card text-foreground"
+              }`}
+            >
+              {!isUser && (
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="absolute -right-1 -top-1 h-7 w-7 opacity-0 transition-opacity group-hover:opacity-100"
+                    >
+                      <MoreHorizontal className="h-4 w-4 text-muted-foreground" />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-48 p-1" align="end">
+                    <Button variant="ghost" size="sm" onClick={() => onAsk(i, msg.provider as AIProvider | undefined)} className="w-full justify-start text-[13px]">
+                      Ask {AI_MODELS[defaultOther(msg.provider as AIProvider | undefined)].name}
+                    </Button>
+                    <Button variant="ghost" size="sm" onClick={() => onVote(i)} className="w-full justify-start text-[13px]">
+                      Call a vote
+                    </Button>
+                    <Button variant="ghost" size="sm" onClick={() => onDebate(i)} className="w-full justify-start text-[13px]">
+                      Start a debate
+                    </Button>
+                  </PopoverContent>
+                </Popover>
+              )}
+
+              {!isUser && showProviderBadge && provider && (
+                <div className="mb-1.5 flex items-center gap-1.5">
+                  <span
+                    className="h-1.5 w-1.5 rounded-full"
+                    style={{ backgroundColor: colorVar ? `hsl(var(--${colorVar}))` : undefined }}
+                  />
+                  <span
+                    className="text-xs text-muted-foreground"
+                    style={{ color: colorVar ? `hsl(var(--${colorVar}))` : undefined }}
+                  >
+                    {provider === "master" ? "Router" : model?.name}
+                  </span>
+                </div>
+              )}
+              <div className="whitespace-pre-wrap break-words text-pretty">
+                {msg.content.split("**").map((part, j) =>
+                  j % 2 === 1 ? (
+                    <strong key={j} className="font-semibold">{part}</strong>
+                  ) : (
+                    <span key={j}>{part}</span>
+                  )
+                )}
+              </div>
+              {!isUser && msg.routingNote && (
+                <p className="mt-1 text-xs text-muted-foreground">{msg.routingNote}</p>
+              )}
+            </div>
+          </div>
+        );
+      })}
       {isTyping && (
-        <div className="animate-fade-up flex items-center gap-1 px-3 py-2">
-          <div className="typing-dot w-1.5 h-1.5 rounded-full bg-muted-foreground" />
-          <div className="typing-dot w-1.5 h-1.5 rounded-full bg-muted-foreground" />
-          <div className="typing-dot w-1.5 h-1.5 rounded-full bg-muted-foreground" />
+        <div className="flex items-center gap-1.5 px-1">
+          <div className="typing-dot h-1.5 w-1.5 rounded-full bg-muted-foreground" />
+          <div className="typing-dot h-1.5 w-1.5 rounded-full bg-muted-foreground" />
+          <div className="typing-dot h-1.5 w-1.5 rounded-full bg-muted-foreground" />
         </div>
       )}
       <div ref={endRef} />
 
       <Dialog open={!!askDialog?.open} onOpenChange={(o) => !o && setAskDialog(null)}>
-        <DialogContent>
+        <DialogContent className="sm:max-w-sm">
           <DialogHeader>
-            <DialogTitle>Ask another AI</DialogTitle>
+            <DialogTitle className="text-base font-medium">Ask another model</DialogTitle>
           </DialogHeader>
-          <div className="space-y-2">
+          <div className="space-y-1">
             {availableProviders.map(p => (
-              <label key={p} className="flex items-center gap-3 rounded-lg border border-border bg-card px-3 py-2 cursor-pointer hover:bg-accent transition-colors">
+              <label key={p} className="flex cursor-pointer items-center gap-3 rounded-lg px-3 py-2 transition-colors hover:bg-accent">
                 <Checkbox checked={askTarget === p} onCheckedChange={() => setAskTarget(p)} />
-                <div className="text-sm font-medium text-foreground">{AI_MODELS[p].name}</div>
-                <div className="text-xs text-muted-foreground truncate">{AI_MODELS[p].fullName}</div>
+                <span className="h-2 w-2 rounded-full" style={{ backgroundColor: `hsl(var(--${AI_MODELS[p].color}))` }} />
+                <span className="text-sm text-foreground">{AI_MODELS[p].name}</span>
               </label>
             ))}
           </div>
           <DialogFooter className="gap-2">
-            <Button variant="outline" onClick={() => setAskDialog(null)}>
-              Cancel
-            </Button>
-            <Button onClick={confirmAsk}>
-              Ask
-            </Button>
+            <Button variant="ghost" size="sm" onClick={() => setAskDialog(null)}>Cancel</Button>
+            <Button size="sm" onClick={confirmAsk}>Ask</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
       <Dialog open={!!debateDialog?.open} onOpenChange={(o) => !o && setDebateDialog(null)}>
-        <DialogContent>
+        <DialogContent className="sm:max-w-sm">
           <DialogHeader>
-            <DialogTitle>Start a debate</DialogTitle>
+            <DialogTitle className="text-base font-medium">Start a debate</DialogTitle>
           </DialogHeader>
-          <div className="space-y-2">
+          <div className="space-y-1">
             {availableProviders.map(p => (
-              <label key={p} className="flex items-center gap-3 rounded-lg border border-border bg-card px-3 py-2 cursor-pointer hover:bg-accent transition-colors">
+              <label key={p} className="flex cursor-pointer items-center gap-3 rounded-lg px-3 py-2 transition-colors hover:bg-accent">
                 <Checkbox checked={debateParticipants.includes(p)} onCheckedChange={() => toggleDebater(p)} />
-                <div className="text-sm font-medium text-foreground">{AI_MODELS[p].name}</div>
-                <div className="text-xs text-muted-foreground truncate">{AI_MODELS[p].fullName}</div>
+                <span className="h-2 w-2 rounded-full" style={{ backgroundColor: `hsl(var(--${AI_MODELS[p].color}))` }} />
+                <span className="text-sm text-foreground">{AI_MODELS[p].name}</span>
               </label>
             ))}
           </div>
           <DialogFooter className="gap-2">
-            <Button variant="outline" onClick={() => setDebateDialog(null)}>
-              Cancel
-            </Button>
-            <Button onClick={confirmDebate}>
-              Start
-            </Button>
+            <Button variant="ghost" size="sm" onClick={() => setDebateDialog(null)}>Cancel</Button>
+            <Button size="sm" onClick={confirmDebate}>Start</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </div>
-  );
-}
-
-function MessageBubble({
-  message,
-  showProviderBadge,
-  onAsk,
-  onVote,
-  onDebate,
-  askLabel,
-}: {
-  message: ChatMessage;
-  showProviderBadge?: boolean;
-  onAsk: () => void;
-  onVote: () => void;
-  onDebate: () => void;
-  askLabel: string;
-}) {
-  const isUser = message.role === "user";
-  const provider = message.provider as AIProvider | "master" | undefined;
-  const model = provider && provider !== "master" ? AI_MODELS[provider] : null;
-  const colorVar = provider === "master" ? "ai-master" : model?.color;
-
-  return (
-    <div className={`flex ${isUser ? "justify-end" : "justify-start"}`}>
-      <div
-        className={`relative group max-w-[85%] rounded-lg px-3.5 py-2.5 text-sm leading-relaxed shadow-sm ${
-          isUser
-            ? "bg-secondary text-foreground"
-            : "bg-card border border-border text-foreground"
-        }`}
-      >
-        {!isUser && (
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="absolute top-1.5 right-1.5 h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity"
-                aria-label="Message actions"
-              >
-                <MoreHorizontal className="w-4 h-4 text-muted-foreground" />
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-52 p-1" align="end">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={onAsk}
-                className="w-full justify-start"
-              >
-                {askLabel}
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={onVote}
-                className="w-full justify-start"
-              >
-                Call a vote
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={onDebate}
-                className="w-full justify-start"
-              >
-                Start a debate
-              </Button>
-            </PopoverContent>
-          </Popover>
-        )}
-
-        {!isUser && showProviderBadge && provider && (
-          <div className="flex items-center gap-1.5 mb-1.5">
-            <div
-              className="w-2 h-2 rounded-full"
-              style={{ backgroundColor: colorVar ? `hsl(var(--${colorVar}))` : undefined }}
-            />
-            <span
-              className="text-xs font-medium"
-              style={{ color: colorVar ? `hsl(var(--${colorVar}))` : undefined }}
-            >
-              {provider === "master" ? "Router" : model?.name}
-            </span>
-          </div>
-        )}
-        <div className="whitespace-pre-wrap break-words text-pretty">
-          {message.content.split("**").map((part, i) =>
-            i % 2 === 1 ? (
-              <strong key={i} className="font-semibold">{part}</strong>
-            ) : (
-              <span key={i}>{part}</span>
-            )
-          )}
-        </div>
-        {!isUser && typeof message.reasoningTokens === "number" && (
-          <div className="mt-1 text-[12px]" style={{ color: "#7a8aaa" }}>
-            Reasoning tokens: {message.reasoningTokens}
-          </div>
-        )}
-        {!isUser && message.routingNote && (
-          <div className="mt-1 text-[12px]" style={{ color: "#7a8aaa" }}>
-            {message.routingNote}
-          </div>
-        )}
-      </div>
     </div>
   );
 }

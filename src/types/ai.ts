@@ -84,16 +84,16 @@ export const AI_MODELS: Record<AIProvider, AIModel> = {
   gpt: {
     id: "gpt",
     name: "GPT",
-    fullName: "openai/gpt-oss-20b:free",
+    fullName: "openai/gpt-oss-120b:free",
     color: "ai-gpt",
-    description: "OpenRouter — GPT OSS 20B (free)",
+    description: "OpenRouter — GPT OSS 120B (free)",
   },
   gemini: {
     id: "gemini",
-    name: "Llama",
-    fullName: "meta-llama/llama-3.3-70b-instruct:free",
+    name: "Step",
+    fullName: "stepfun/step-3.5-flash:free",
     color: "ai-gemini",
-    description: "OpenRouter — Llama 3.3 70B Instruct (free)",
+    description: "OpenRouter — Step 3.5 Flash (free)",
   },
   claude: {
     id: "claude",

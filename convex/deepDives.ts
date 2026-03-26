@@ -149,6 +149,23 @@ export const createDeepDive = mutation({
   },
 });
 
+export const renameDeepDive = mutation({
+  args: {
+    diveId: v.id("deepDives"),
+    title: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const dive = await ctx.db.get(args.diveId);
+    if (!dive) throw new Error("Deep dive not found");
+    const trimmed = args.title.trim();
+    if (!trimmed) throw new Error("Title cannot be empty");
+    await ctx.db.patch(args.diveId, {
+      title: truncateTitle(trimmed),
+      updatedAt: now(),
+    });
+  },
+});
+
 export const createThread = mutation({
   args: {
     deepDiveId: v.id("deepDives"),

@@ -1,6 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { Send } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { ArrowUp } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 
 interface ChatInputProps {
@@ -9,7 +8,7 @@ interface ChatInputProps {
   disabled?: boolean;
 }
 
-export function ChatInput({ onSend, placeholder = "Type a message...", disabled }: ChatInputProps) {
+export function ChatInput({ onSend, placeholder = "Type a message…", disabled }: ChatInputProps) {
   const [value, setValue] = useState("");
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
@@ -37,12 +36,12 @@ export function ChatInput({ onSend, placeholder = "Type a message...", disabled 
   const handleInput = () => {
     if (inputRef.current) {
       inputRef.current.style.height = "auto";
-      inputRef.current.style.height = Math.min(inputRef.current.scrollHeight, 120) + "px";
+      inputRef.current.style.height = Math.min(inputRef.current.scrollHeight, 140) + "px";
     }
   };
 
   return (
-    <div className="flex items-end gap-3 rounded-[24px] border border-border/80 bg-white/80 p-3 shadow-[0_1px_0_rgba(255,255,255,0.7)_inset] dark:bg-white/[0.04] dark:shadow-[0_1px_0_rgba(255,255,255,0.04)_inset]">
+    <div className="flex items-end gap-2 rounded-lg border border-border bg-card p-2">
       <Textarea
         ref={inputRef}
         value={value}
@@ -51,17 +50,17 @@ export function ChatInput({ onSend, placeholder = "Type a message...", disabled 
         placeholder={placeholder}
         disabled={disabled}
         rows={1}
-        className="min-h-0 flex-1 resize-none border-0 bg-transparent px-1 py-2 text-sm leading-7 shadow-none focus-visible:ring-0"
-        style={{ maxHeight: 120, height: "auto" }}
+        className="min-h-0 flex-1 resize-none border-0 bg-transparent px-2 py-1.5 text-sm leading-relaxed shadow-none focus-visible:ring-0"
+        style={{ maxHeight: 140, height: "auto" }}
       />
-      <Button
-        size="icon"
+      <button
+        type="button"
         onClick={handleSubmit}
         disabled={!value.trim() || disabled}
-        className="h-11 w-11 shrink-0 rounded-full dark:bg-primary dark:text-primary-foreground"
+        className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-foreground text-background transition-opacity disabled:opacity-30"
       >
-        <Send className="w-4 h-4" />
-      </Button>
+        <ArrowUp className="h-4 w-4" />
+      </button>
     </div>
   );
 }
